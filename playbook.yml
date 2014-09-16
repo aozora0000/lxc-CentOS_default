@@ -1,0 +1,28 @@
+---
+- hosts: all
+  sudo: yes
+  tasks:
+    - name: 時刻設定
+      command: ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+    - name: リゾルバ設定
+      copy: src=./files/resolv.conf dest=/etc/resolv.conf backup=yes
+
+    - name: eth-0設定
+      copy: src=./files/ifcfg-eth0 dest=/etc/sysconfig/network-scripts/ifcfg-eth0 backup=yes
+
+    - name: ネットワークリスタート
+      service: name=network state=restarted
+
+    - name: epelリポジトリ登録
+      yum:  name=http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+
+    - name: コモンパッケージインストール
+      yum:  name={{item}} state=latest
+      with_items:
+        - git
+        - htop
+        - which
+        - tar
+        - gcc
+        - openssl-devel
